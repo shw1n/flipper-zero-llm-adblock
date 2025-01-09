@@ -127,13 +127,15 @@ async def main():
                     current_state = await classify_image(image_path)
                     print("Current state:", current_state)
                     
-                    # Set mute state based on content, but only if it needs to change
+                    # Send IR commands to mute/unmute AVR based on content
                     if current_state == "ad" and not is_muted:
-                        flipper.send_command('vibro 1')  # Signal to mute
+                        # flipper.send_command('vibro 1')  # Original vibro signal to mute
+                        flipper.send_command('ir tx /ext/infrared/AVR_Mute.ir')  # Send mute IR command
                         is_muted = True
                         print("TV muted")
                     elif current_state == "show" and is_muted:
-                        flipper.send_command('vibro 0')  # Signal to unmute
+                        # flipper.send_command('vibro 0')  # Original vibro signal to unmute
+                        flipper.send_command('ir tx /ext/infrared/AVR_Unmute.ir')  # Send unmute IR command
                         is_muted = False
                         print("TV unmuted")
                     
@@ -144,7 +146,8 @@ async def main():
         except KeyboardInterrupt:
             # Make sure TV is unmuted when exiting
             if is_muted:
-                flipper.send_command('vibro 0')
+                # flipper.send_command('vibro 0')  # Original vibro signal to unmute
+                flipper.send_command('ir tx /ext/infrared/AVR_Unmute.ir')
             # Release the capture when done
             cap.release()
             print("Stopped capturing images.")
