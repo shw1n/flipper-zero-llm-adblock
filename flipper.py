@@ -5,7 +5,10 @@ def main():
     try:
         # Connect to Flipper Zero via serial
         port = "/dev/cu.usbmodemflip_A75akoyu1"  # Adjust port as needed
-        ser = serial.Serial(port, baudrate=9600, bytesize=8, stopbits=serial.STOPBITS_ONE, timeout=None)
+        #ser = serial.Serial(port, baudrate=9600, bytesize=8, stopbits=serial.STOPBITS_ONE, timeout=None)
+        # any baudrate works it seems
+        ser = serial.Serial(port, baudrate=115200)
+
         print(ser.read_until(b'>:').decode('utf-8').strip())
         
         # Give device time to initialize
