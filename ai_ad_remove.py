@@ -6,6 +6,7 @@ import base64
 import json
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
+from flipper import FlipperZero
 
 # Load environment variables from .env file
 load_dotenv()
@@ -106,27 +107,41 @@ def test_camera(camera_index):
 
 async def main():
     cap = cv2.VideoCapture(1)
-    try:
-        while True:
-            # Capture frame-by-frame
-            print("Capturing frame")
-            ret, frame = cap.read()
-            print("Frame captured")
-            if ret:
-                # Save the captured frame as a temporary image file
-                image_path = "temp_image.jpg"
-                cv2.imwrite(image_path, frame)
+    previous_state = None
+    
+    # Initialize Flipper Zero connection
+    with FlipperZero() as flipper:
+        try:
+            while True:
+                # Capture frame-by-frame
+                print("Capturing frame")
+                ret, frame = cap.read()
+                print("Frame captured")
+                if ret:
+                    # Save the captured frame as a temporary image file
+                    image_path = "temp_image.jpg"
+                    cv2.imwrite(image_path, frame)
+                    
+                    # Classify the image
+                    current_state = await classify_image(image_path)
+                    print("Current state:", current_state)
+                    
+                    # Check if state has changed
+                    if previous_state is not None and current_state != previous_state:
+                        # Send vibration command to Flipper
+                        flipper.send_command('vibro 1')
+                        time.sleep(1)
+                        flipper.send_command('vibro 0')
+                        print("State changed - Vibration triggered")
+                    
+                    previous_state = current_state
                 
-                # Classify the image
-                state = await classify_image(image_path)
-                print("Current state:", state)
-            
-            # Wait for 3 seconds
-            time.sleep(3)
-    except KeyboardInterrupt:
-        # Release the capture when done
-        cap.release()
-        print("Stopped capturing images.")
+                # Wait for 3 seconds
+                time.sleep(3)
+        except KeyboardInterrupt:
+            # Release the capture when done
+            cap.release()
+            print("Stopped capturing images.")
 
 if __name__ == "__main__":
     asyncio.run(main())
