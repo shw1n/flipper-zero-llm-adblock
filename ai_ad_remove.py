@@ -9,7 +9,9 @@ from openai import OpenAI
 # Load environment variables from .env file
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Either works, just gotta set OPENAI_API_KEY in .env
+#client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = OpenAI()
 
 # Function to classify image as AD or SHOW
 def classify_image(image_path):
