@@ -1,6 +1,12 @@
 import serial
 import time
 
+def send_command(ser, command):
+    """Send a command to Flipper Zero and return the response"""
+    ser.write(f'{command}\r\n'.encode())
+    response = ser.read_until(b'>:').decode('utf-8').strip()
+    return response
+
 def main():
     try:
         # Connect to Flipper Zero via serial
@@ -9,12 +15,14 @@ def main():
         # any baudrate works it seems
         ser = serial.Serial(port, baudrate=115200)
 
-        print(ser.read_until(b'>:').decode('utf-8').strip())
+        # Get initial prompt
+        initial_prompt = ser.read_until(b'>:').decode('utf-8').strip()
+        print(initial_prompt)
         
-        # Give device time to initialize
-        time.sleep(2)
-        ser.write(b'help\r\n')
-        print(ser.read_until(b'>:').decode('utf-8').strip())
+        
+        # Send help command and get response
+        help_response = send_command(ser, 'help')
+        print(help_response)
         
         # Read the welcome message
         welcome_message = ser.readline().decode('utf-8').strip()
