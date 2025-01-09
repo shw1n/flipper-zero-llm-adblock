@@ -108,6 +108,7 @@ def test_camera(camera_index):
 async def main():
     cap = cv2.VideoCapture(1)
     previous_state = None
+    is_muted = False  # Track whether TV is currently muted
     
     # Initialize Flipper Zero connection
     with FlipperZero() as flipper:
@@ -126,19 +127,24 @@ async def main():
                     current_state = await classify_image(image_path)
                     print("Current state:", current_state)
                     
-                    # Check if state has changed
-                    if previous_state is not None and current_state != previous_state:
-                        # Send vibration command to Flipper
-                        flipper.send_command('vibro 1')
-                        time.sleep(1)
-                        flipper.send_command('vibro 0')
-                        print("State changed - Vibration triggered")
+                    # Set mute state based on content, but only if it needs to change
+                    if current_state == "ad" and not is_muted:
+                        flipper.send_command('vibro 1')  # Signal to mute
+                        is_muted = True
+                        print("TV muted")
+                    elif current_state == "show" and is_muted:
+                        flipper.send_command('vibro 0')  # Signal to unmute
+                        is_muted = False
+                        print("TV unmuted")
                     
                     previous_state = current_state
                 
                 # Wait for 3 seconds
                 time.sleep(3)
         except KeyboardInterrupt:
+            # Make sure TV is unmuted when exiting
+            if is_muted:
+                flipper.send_command('vibro 0')
             # Release the capture when done
             cap.release()
             print("Stopped capturing images.")
