@@ -3,6 +3,7 @@ import time
 import os
 import asyncio
 import base64
+import json
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
 
@@ -12,7 +13,7 @@ load_dotenv()
 # Either works, just gotta set OPENAI_API_KEY in .env
 client = AsyncOpenAI()
 
-# Function to classify image as AD or SHOW
+# Function to classify image as ad or show
 async def classify_image(image_path):
     with open(image_path, "rb") as image_file:
         # Encode the image in base64 format
@@ -26,7 +27,7 @@ async def classify_image(image_path):
             "content": [
                 {
                 "type": "text",
-                "text": "Return whether the image on the TV is an ad or not in JSON format (e.g., {'content': 'AD'} or {'content': 'SHOW'}).",
+                "text": "Return whether the image on the TV is an ad or not in JSON format (e.g., {'content': 'ad'} or {'content': 'show'}). Note: do NOT start text with ```json",
                 },
                 {
                 "type": "image_url",
@@ -40,6 +41,19 @@ async def classify_image(image_path):
     )
 
     print(response.choices[0])
+    try:
+        # Print raw response for debugging
+        raw_content = response.choices[0].message.content
+        print(f"Raw response: {raw_content}")
+        
+        # Clean up the response if needed
+        cleaned_content = raw_content.strip().replace("'", '"')
+        response_json = json.loads(cleaned_content)
+        return response_json['content']
+    except json.JSONDecodeError as e:
+        print(f"JSON parsing error: {e}")
+        print(f"Failed to parse: {raw_content}")
+        return "unknown"
 
 # List all available cameras
 def list_cameras():
