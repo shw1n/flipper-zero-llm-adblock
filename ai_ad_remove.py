@@ -41,10 +41,57 @@ async def classify_image(image_path):
 
     print(response.choices[0])
 
-# Initialize webcam capture
-cap = cv2.VideoCapture(0)
+# List all available cameras
+def list_cameras():
+    available_cameras = []
+    for i in range(10):  # Check first 10 indexes
+        cap = cv2.VideoCapture(i)
+        if cap.isOpened():
+            print(f"Camera index {i} is available")
+            available_cameras.append(i)
+        cap.release()
+    return available_cameras
+
+# Test specific camera
+def test_camera(camera_index):
+    print(f"\nTesting camera {camera_index}...")
+    cap = cv2.VideoCapture(camera_index)
+    
+    if not cap.isOpened():
+        print(f"Failed to open camera {camera_index}")
+        return False
+    
+    print("Camera opened successfully")
+    print(f"Resolution: {cap.get(cv2.CAP_PROP_FRAME_WIDTH)}x{cap.get(cv2.CAP_PROP_FRAME_HEIGHT)}")
+    
+    ret, frame = cap.read()
+    if not ret:
+        print("Failed to grab frame")
+        cap.release()
+        return False
+    
+    print("Successfully grabbed frame")
+    try:
+        cv2.imwrite(f'test_camera_{camera_index}.jpg', frame)
+        print(f"Successfully saved test_camera_{camera_index}.jpg")
+    except Exception as e:
+        print(f"Failed to save image: {e}")
+    
+    cap.release()
+    return True
+
+# print("Searching for available cameras...")
+# cameras = list_cameras()
+
+# if not cameras:
+#     print("No cameras found!")
+# else:
+#     print(f"\nFound {len(cameras)} camera(s)")
+#     for cam in cameras:
+#         test_camera(cam)
 
 async def main():
+    cap = cv2.VideoCapture(1)
     try:
         while True:
             # Capture frame-by-frame
