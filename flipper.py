@@ -50,11 +50,20 @@ class FlipperZero:
         """Support for context manager protocol"""
         self.disconnect()
 
+def tx(protocol: str, hex_address: str, hex_command: str) -> None:
+    address = ' '.join(hex_address[i:i+2] for i in range(0, len(hex_address), 2)) if " " not in hex_address else hex_address
+    command = ' '.join(hex_command[i:i+2] for i in range(0, len(hex_command), 2)) if " " not in hex_command else hex_command
+    print(f"{protocol} {address} {command}")
+
 def main():
+    tx("Kaseikyo", "41543200", "72010000")
     # Example usage
     with FlipperZero() as flipper:
         #flipper.connect()
-        help_response = flipper.send_command('help')
+        #help_response = flipper.send_command('vibro 100,100,200')
+        #help_response = flipper.send_command('ir tx Kaseikyo 41 54 32 00 72 01 00 00')  # Send mute IR command
+        # need to reverse byte order compared to command in github files to work
+        help_response = flipper.send_command('ir tx Kaseikyo 0x325441 0x0172')  # Send mute IR command
         print(help_response)
 
 if __name__ == "__main__":
