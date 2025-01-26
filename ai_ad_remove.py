@@ -125,15 +125,15 @@ async def main():
                     
                     # Send IR commands to mute/unmute AVR based on content
                     if current_state == "ad" and not is_muted:
-                        flipper.send_command('vibro 1')  # Original vibro signal to mute
+                        #flipper.send_command('vibro 1')  # Original vibro signal to mute
                         #flipper.send_command('ir tx raw 38000 0.33 275 762 271 1800 277 786 278 784 249 813 241 795 248 814 219 817 247 789 254 1818 249 1824 274 1798 279 1820 278 759 274 788 245 43887 274 789 275 1798 279 783 250 812 252 784 249 1823 274 1798 279 1820 247 1826 271 765 278 809 224 812 252 784 249 1823 275 1798 279 43880 281 782 251 1821 277 760 273 789 244 818 246 790 253 808 246 791 252 809 224 1822 275 1797 280 1819 248 1825 273 790 253 808 246')  # Send mute IR command
-                        #flipper.send_command('ir tx Kaseikyo 0x325441 0x0172')
+                        flipper.send_command('ir tx Kaseikyo 0x325441 0x0172')
                         is_muted = True
                         print("TV muted")
                     elif current_state == "show" and is_muted:
-                        flipper.send_command('vibro 0')  # Original vibro signal to unmute
+                        #flipper.send_command('vibro 0')  # Original vibro signal to unmute
                         #flipper.send_command('ir tx raw 38000 0.33 275 762 271 1800 277 786 278 784 249 813 241 795 248 814 219 817 247 789 254 1818 249 1824 274 1798 279 1820 278 759 274 788 245 43887 274 789 275 1798 279 783 250 812 252 784 249 1823 274 1798 279 1820 247 1826 271 765 278 809 224 812 252 784 249 1823 275 1798 279 43880 281 782 251 1821 277 760 273 789 244 818 246 790 253 808 246 791 252 809 224 1822 275 1797 280 1819 248 1825 273 790 253 808 246')  # Send unmute IR command
-                        #flipper.send_command('ir tx Kaseikyo 0x325441 0x0172')
+                        flipper.send_command('ir tx Kaseikyo 0x325441 0x0172')
                         is_muted = False
                         print("TV unmuted")
                     

@@ -11,11 +11,13 @@ from ollama import AsyncClient as AsyncOllama
 load_dotenv()
 
 # Either works, just gotta set OPENAI_API_KEY in .env
-openai_client = AsyncOpenAI()
-ollama_client = AsyncOllama()
+# openai_client = AsyncOpenAI()
+# ollama_client = AsyncOllama()
 #PROMPT = "Return whether the image on the TV is an ad or not in JSON format (e.g., {'content': 'ad'} or {'content': 'show'}). If not sure or don't see a TV, just take best guess. Do not say anything else but the requested JSON, or you will be penalized. Note: do NOT start text with ```json"
 PROMPT = "Return whether the image on the TV is an ad or not in JSON format (e.g., {'content': 'ad'} or {'content': 'show'}). Do not say anything else but the requested JSON, or you will be penalized. Note: do NOT start text with ```json"
 
+# Add a flag to track if system prompt has been set
+system_prompt_set = False
 
 async def classify_image_openai(encoded_image) -> str:
     response = await openai_client.chat.completions.create(
@@ -55,12 +57,13 @@ async def classify_image_openai(encoded_image) -> str:
         return "unknown"
 
 async def classify_image_ollama(encoded_image):
+    global system_prompt_set
     url = "http://localhost:11434/api/generate"
     
     payload = {
-        #"model": "llama3.2-vision",
-        "model": "moondream",
-        "prompt": PROMPT,
+        "model": "llama3.2-vision:flipper",
+        #"model": "moondream",
+        "prompt": "Analyze this image as per system instructions",
         "images": [encoded_image],
         "stream": False,
     }

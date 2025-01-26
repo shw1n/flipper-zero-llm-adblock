@@ -1,10 +1,10 @@
-import serial
+import serial  # Import the module directly
 import time
 
 class FlipperZero:
     """Interface for communicating with Flipper Zero via serial connection"""
     
-    def __init__(self, port="/dev/cu.usbmodemflip_A75akoyu1", baudrate=115200):
+    def __init__(self, port="COM3", baudrate=115200):  # Original port: /dev/cu.usbmodemflip_A75akoyu1
         """Initialize connection to Flipper Zero"""
         self.port = port
         self.baudrate = baudrate
@@ -13,7 +13,7 @@ class FlipperZero:
     def connect(self):
         """Establish serial connection and read initial messages"""
         try:
-            self.serial = serial.Serial(self.port, baudrate=self.baudrate)
+            self.serial = serial.Serial(self.port, baudrate=self.baudrate)  # Use serial.Serial instead of just Serial
             
             # Get initial prompt
             initial_prompt = self.serial.read_until(b'>:').decode('utf-8').strip()
