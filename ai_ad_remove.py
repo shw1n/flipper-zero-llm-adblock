@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from openai import AsyncOpenAI
 from flipper import FlipperZero
 from image_classifier import classify_image_ollama, classify_image_openai
+from datetime import datetime
 # Load environment variables from .env file
 load_dotenv()
 
@@ -76,23 +77,46 @@ def test_camera(camera_index):
 #     for cam in cameras:
 #         test_camera(cam)
 
+def get_new_run_folder():
+    # Create output directory if it doesn't exist
+    base_dir = "output"
+    if not os.path.exists(base_dir):
+        os.makedirs(base_dir)
+    
+    # Get list of existing run folders
+    existing_runs = [d for d in os.listdir(base_dir) if os.path.isdir(os.path.join(base_dir, d)) and d.startswith("run_")]
+    
+    # Get next run number
+    next_run = len(existing_runs)
+    
+    # Create new run folder with timestamp
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_folder = os.path.join(base_dir, f"run_{next_run:03d}_{timestamp}")
+    os.makedirs(run_folder)
+    
+    return run_folder
+
 async def main():
-    cap = cv2.VideoCapture(1)
+    cap = cv2.VideoCapture(0)
+    run_folder = get_new_run_folder()
+    frame_count = 0
     previous_state = None
     is_muted = False  # Track whether TV is currently muted
+
+    # list cameras
+    cameras = list_cameras()
+    print(f"Found {len(cameras)} cameras")
+    print(f"Using camera {cameras[0]}")
     
-    # Initialize Flipper Zero connection
     with FlipperZero() as flipper:
         try:
             while True:
-                # Capture frame-by-frame
-                print("Capturing frame")
                 ret, frame = cap.read()
-                print("Frame captured")
                 if ret:
-                    # Save the captured frame as a temporary image file
-                    image_path = "temp_image.jpg"
+                    # Save frame with numbered filename
+                    image_path = os.path.join(run_folder, f"frame_{frame_count:04d}.jpg")
                     cv2.imwrite(image_path, frame)
+                    frame_count += 1
                     
                     # Classify the image
                     current_state = await classify_image(image_path, model="openai")
@@ -125,7 +149,7 @@ async def main():
                 #flipper.send_command('ir tx /ext/infrared/AVR_Unmute.ir')
             # Release the capture when done
             cap.release()
-            print("Stopped capturing images.")
+            print(f"Stopped capturing. Images saved in {run_folder}")
 
 if __name__ == "__main__":
     asyncio.run(main())
