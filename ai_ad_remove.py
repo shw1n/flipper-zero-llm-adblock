@@ -5,21 +5,22 @@ import asyncio
 import base64
 import json
 from dotenv import load_dotenv
-from openai import AsyncOpenAI
 from flipper import FlipperZero
 from image_classifier import classify_image_ollama, classify_image_openai
 from datetime import datetime
 # Load environment variables from .env file
 load_dotenv()
 
-# Either works, just gotta set OPENAI_API_KEY in .env
-client = AsyncOpenAI()
+MODEL_TO_USE = "ollama"
+# MODEL_TO_USE = "openai"
 
 # Function to classify image as ad or show
 async def classify_image(image_path, model="openai"):
     with open(image_path, "rb") as image_file:
         # Encode the image in base64 format
         encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+
+    print(f"Classifying image with {model} model")
     
     if model == "openai":
         return await classify_image_openai(encoded_image)
@@ -119,8 +120,7 @@ async def main():
                     frame_count += 1
                     
                     # Classify the image
-                    current_state = await classify_image(image_path, model="openai")
-                    #current_state = await classify_image(image_path, model="ollama")
+                    current_state = await classify_image(image_path, model=MODEL_TO_USE)
                     print("Current state:", current_state)
                     
                     # Send IR commands to mute/unmute AVR based on content
